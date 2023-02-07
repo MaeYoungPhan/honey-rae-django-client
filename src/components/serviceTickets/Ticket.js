@@ -40,7 +40,7 @@ export const Ticket = () => {
     }
 
     const updateTicket = (evt) => {
-        const updatedTicket = {...ticket, employee: parseInt(evt.target.value)}
+        const updatedTicket = {...ticket, employee: parseInt(evt.target.value), date_completed: Date()}
 
         fetchIt(
             `http://localhost:8000/tickets/${ticketId}`,
@@ -99,7 +99,7 @@ export const Ticket = () => {
                     </div>
                     {
                         isStaff()
-                            ? ""
+                            ? <button>Mark Done</button>
                             : <button onClick={deleteTicket}>Delete</button>
                     }
                 </footer>
