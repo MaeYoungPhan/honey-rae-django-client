@@ -10,6 +10,7 @@ export const TicketList = () => {
     const [active, setActive] = useState("")
     const { toggle, setOriginal, condensed: tickets } = useCondensed({ limit: 40, field: "description" })
     const history = useHistory()
+    const [searchTerms, setSearchTerms] = useState("Search Tickets")
 
     useEffect(() => {
         fetchIt("http://localhost:8000/tickets")
@@ -39,6 +40,38 @@ export const TicketList = () => {
         }
     }
 
+    const handleSubmit = (e) => {
+        e.preventDefault()
+        searchTickets(`search=${searchTerms}`)
+        setSearchTerms("Search Tickets")
+        document.getElementById("search").value = "" 
+    };
+    
+    const handleKeypress = (e) => {
+          //triggers by pressing the enter key
+        if (e.keyCode === 13) {
+            handleSubmit();
+        }
+    };
+
+    const toShowOrNotToShowSearch = () => {
+        if (isStaff()) {
+            return <><form><input type="textfield" placeholder={searchTerms}  id="search"
+                onChange={(e) =>
+                    setSearchTerms(e.target.value)}
+                onKeyUp={handleKeypress}>
+                </input>
+                <button type="submit"
+                    onClick={handleSubmit}
+                    >Go</button>
+                </form>
+                </>
+        }
+        else {
+            return ""
+        }
+    }
+
     const filterTickets = (status) => {
         fetchIt(`http://localhost:8000/tickets?status=${status}`)
             .then((tickets) => {
@@ -47,11 +80,28 @@ export const TicketList = () => {
             .catch(() => setOriginal([]))
     }
 
+    const searchTickets = (filter) => {
+        fetchIt(`http://localhost:8000/tickets?${filter}`)
+            .then((tickets) => {
+                setOriginal(tickets)
+            })
+            .catch(() => setOriginal([]))
+    }
+
+
     return <>
         <div>
             <button onClick={() => filterTickets("done")}>Show Done</button>
             <button onClick={() => filterTickets("all")}>Show All</button>
+            {
+            isStaff()
+            ? <div>
+            <button onClick={() => filterTickets("unclaimed")}>Show Unclaimed</button>
+            <button onClick={() => filterTickets("inprogress")}>Show In Progress</button></div>
+            : ""
+            }
         </div>
+        <div className="actions">{toShowOrNotToShowSearch()}</div>
         <div className="actions">{toShowOrNotToShowTheButton()}</div>
         <div className="activeTickets">{active}</div>
         <article className="tickets">

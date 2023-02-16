@@ -40,7 +40,7 @@ export const Ticket = () => {
     }
 
     const updateTicket = (evt) => {
-        const updatedTicket = {...ticket, employee: parseInt(evt.target.value), date_completed: Date()}
+        const updatedTicket = {...ticket, employee: parseInt(evt.target.value)}
 
         fetchIt(
             `http://localhost:8000/tickets/${ticketId}`,
@@ -49,6 +49,19 @@ export const Ticket = () => {
                 body: JSON.stringify(updatedTicket)
             }
         ).then(fetchTicket)
+    }
+
+    const markComplete = (date) => {
+
+        const finishedTicket = {...ticket, employee: ticket.employee.id, customer: ticket.customer.id, date_completed: date}
+
+        fetchIt(
+            `http://localhost:8000/tickets/${ticket.id}`,
+            {
+                method: "PUT",
+                body: JSON.stringify(finishedTicket)
+            }
+            ).then(fetchTicket)
     }
 
     const ticketStatus = () => {
@@ -99,7 +112,14 @@ export const Ticket = () => {
                     </div>
                     {
                         isStaff()
-                            ? <button>Mark Done</button>
+                            ? ticket.date_completed === null
+                            ?  <button
+                                    onClick={() => {
+                                        const today_date = Date.now()
+                                        const date = new Date(today_date)
+                                        const dateFormat = date.getFullYear() + "-" +((date.getMonth()+1).length != 2 ? "0" + (date.getMonth() + 1) : (date.getMonth()+1)) + "-" + date.getDate();
+                                        markComplete(dateFormat)}}>Mark Done</button>
+                                    : ""
                             : <button onClick={deleteTicket}>Delete</button>
                     }
                 </footer>
